@@ -14,6 +14,33 @@ In root of repo run:
 After building the image, run:
 `make shell`
 
+### Pre-commit
+
+Once in the root of repository, run:
+`pre-commit install`
+
+This will install pre-commit hooks. 
+
+Later you can the following prior to commiting but after git add:
+
+`pre-commit run --all-files`
+
+### Commitizen
+
+Commitizen is used for commiting as:
+
+`cz c`
+
+The repo is following semantic versioning as 0.0.0:
+- major (major repo change)
+- minor (feature)
+- patch (bug fix)
+
+If the commit is any of these and not a build or refactor run:
+
+`cz bump`
+
+This will update the CHANGELOG.md and VERSION files of the repo. Make sure to commit them. 
 
 ## SentinelHub setup
 
