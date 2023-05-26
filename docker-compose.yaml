@@ -1,0 +1,10 @@
+version: '2.15.1'
+
+services:
+  burnt_area_mapper:
+    image: burnt_area_mapper:latest
+    volumes:
+      - .:/home/matija/burnt_area_mapper
+      - ${HOME}/.config/sentinelhub:/home/matija/.config/sentinelhub
+    ports:
+      - 8080

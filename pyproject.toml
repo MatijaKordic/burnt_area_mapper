@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [
+    "Matija Kordic <matijakordic@rocketmail.com>",
+]
+name = "burnt_area_mapper"
+version = "0.1.0"
+description = "Package for exploring burnt areas using Sentinel 2 and SentinelHub."
+readme = "README.md"
+license = "MIT"
+keywords = ["packaging", "poetry"]
+classifiers = [
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+requires-python = ">=3.11"
+
+[project.urls]
+Source = "https://github.com/python-poetry/poetry"
+
+
+[tool.poetry.scripts]
+my_package_cli = 'my_package.console:run'
