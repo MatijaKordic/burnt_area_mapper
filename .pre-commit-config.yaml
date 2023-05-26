@@ -1,0 +1,24 @@
+repos:
+# Black for formatting of code
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
+    - id: black
+# isort for sorting of imports
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+      args: ["--profile", "black"]
+# Flake8 for linting
+- repo: https://github.com/pycqa/flake8
+  rev: 6.0.0
+  hooks:
+    - id: flake8
+# For commit messages
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: 3.2.2
+  hooks:
+    - id: commitizen
+      stages:
+        - commit-msg

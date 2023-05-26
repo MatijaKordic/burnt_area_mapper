@@ -1,39 +1,34 @@
-from sentinelhub import SHConfig
+import tempfile
+from pathlib import Path
+
+import numpy as np
+import rasterio
+from rasterio.merge import merge
 from sentinelhub import (
     CRS,
     BBox,
+    BBoxSplitter,
     DataCollection,
     MimeType,
     MosaickingOrder,
     SentinelHubDownloadClient,
     SentinelHubRequest,
+    SHConfig,
     bbox_to_dimensions,
-    BBoxSplitter
 )
-# from utils.util import (
-#     recalibrate_time
-# )
-from datetime import timedelta, datetime
-from pathlib import Path
-import tempfile
-
 from shapely.geometry import box
-import rasterio
-from rasterio.merge import merge
-import numpy as np
+
 
 class Sentinel:
-
     def __init__(self) -> None:
         self._auth()
-        # self.evalscript = self._evalscript()
-        # self.bbox = self._get_bbox()
-        # self.size = self._get_size()
 
     def _auth(self):
         self.config = SHConfig()
         if not self.config.sh_client_id or not self.config.sh_client_secret:
-            print("Warning! To use Process API, please provide the credentials (OAuth client ID and client secret).")
+            print(
+                "Warning! To use Process API, please provide the credentials (OAuth client ID and client secret)."
+            )
 
     def _evalscript(self, model="regular"):
         if model == "regular":
@@ -108,7 +103,7 @@ class Sentinel:
             """
             # B12, B8, B3
         return evalscript
-    
+
     def _get_bbox(self):
         """
         Inputs:
@@ -116,11 +111,11 @@ class Sentinel:
         """
         bbox = BBox(bbox=self.coords, crs=CRS.WGS84)
         return bbox
-    
+
     def _get_size(self, bbox):
         size = bbox_to_dimensions(bbox, resolution=10)
         return size
-    
+
     def _get_sub_area(self, bbox, evalscript, start_date, end_date):
         size = bbox_to_dimensions(bbox, resolution=10)
         request = SentinelHubRequest(
@@ -132,7 +127,9 @@ class Sentinel:
                     mosaicking_order=MosaickingOrder.LEAST_CC,
                 )
             ],
-            responses=[SentinelHubRequest.output_response("default", MimeType.TIFF)],
+            responses=[
+                SentinelHubRequest.output_response("default", MimeType.TIFF)
+            ],
             bbox=bbox,
             size=size,
             data_folder=tempfile.gettempdir(),
@@ -144,7 +141,7 @@ class Sentinel:
         if cloud_check == "recalibrate":
             return cloud_check
         return request
-    
+
     def _split(self):
         # (minx, miny, maxx, maxy)
         shp_box = box(*self.coords)
@@ -153,7 +150,6 @@ class Sentinel:
         )  # bounding box will be split into grid of 5x3 bounding boxes
         bbox_list = bbox_splitter.get_bbox_list()
         return bbox_splitter, bbox_list
-        
 
     def _get_imagery(self, start_date, end_date, coords, action):
         self.coords = coords
@@ -162,7 +158,9 @@ class Sentinel:
         bbox = self._get_bbox()
         size = self._get_size(bbox)
         if int(size[1]) > 2500:
-            image, download_type = self._batch_download(evalscript, start_date, end_date)
+            image, download_type = self._batch_download(
+                evalscript, start_date, end_date
+            )
             return image, download_type
         request = SentinelHubRequest(
             data_folder="test_dir",
@@ -174,7 +172,9 @@ class Sentinel:
                     mosaicking_order=MosaickingOrder.LEAST_CC,
                 )
             ],
-            responses=[SentinelHubRequest.output_response("default", MimeType.TIFF)],
+            responses=[
+                SentinelHubRequest.output_response("default", MimeType.TIFF)
+            ],
             bbox=bbox,
             size=size,
             config=self.config,
@@ -186,55 +186,71 @@ class Sentinel:
             return cloud_check, cloud_check
         download_type = "regular"
         return sentinel_image, download_type
-    
+
     def _check_clm(self, image):
-        cloud_band = image[:,:,2]
-        cloud_prob = image[:,:,3]
-        #count occurrences of each unique value
+        cloud_band = image[:, :, 2]
+        _ = image[:, :, 3]
+        # count occurrences of each unique value
         unique, counts = np.unique(cloud_band, return_counts=True)
         dict_counts = dict(zip(unique, counts))
         if dict_counts.get(1):
             value_1 = dict_counts[1]
             value_0 = dict_counts[0]
             value_255 = dict_counts[255]
-            percentage_cloud = ((value_1 + value_255)/(value_0 + value_1 + value_255))*100
+            percentage_cloud = (
+                (value_1 + value_255) / (value_0 + value_1 + value_255)
+            ) * 100
             if percentage_cloud > 10:
                 return "recalibrate"
         elif dict_counts.get(255) in dict_counts:
             value_0 = dict_counts[0]
             value_255 = dict_counts[255]
-            percentage_cloud = ((value_255)/(value_0 + value_255))*100
+            percentage_cloud = ((value_255) / (value_0 + value_255)) * 100
             if percentage_cloud > 10:
                 return "recalibrate"
         return
-    
+
     def _batch_download(self, evalscript, start_date, end_date):
         bbox_splitter, bbox_list = self._split()
 
         # create a list of requests
         bbox_list = bbox_splitter.get_bbox_list()
-        sh_requests = [self._get_sub_area(bbox, evalscript, start_date, end_date) for bbox in bbox_list]
+        sh_requests = [
+            self._get_sub_area(bbox, evalscript, start_date, end_date)
+            for bbox in bbox_list
+        ]
         if sh_requests == "recalibrate":
             return sh_requests, sh_requests
         dl_requests = [request.download_list[0] for request in sh_requests]
 
         # download data with multiple threads
-        _ = SentinelHubDownloadClient(config=self.config).download(dl_requests, max_threads=5)
+        _ = SentinelHubDownloadClient(config=self.config).download(
+            dl_requests, max_threads=5
+        )
 
         # get paths to tiffs
         data_folder = sh_requests[0].data_folder
-        tiffs = [Path(data_folder) / req.get_filename_list()[0] for req in sh_requests]
+        tiffs = [
+            Path(data_folder) / req.get_filename_list()[0]
+            for req in sh_requests
+        ]
         elements = []
         for fp in tiffs:
             src = rasterio.open(fp)
             elements.append(src)
         mosaic, out_trans = merge(elements)
         out_meta = src.meta.copy()
-        out_meta.update({"driver": "GTiff",
-                         "height": mosaic.shape[1],
-                         "width": mosaic.shape[2],
-                         "transform": out_trans})
-        with rasterio.open(f"./data/output_{start_date}.tiff", "w", **out_meta) as dest:
-            dest.write(mosaic)                        
+        out_meta.update(
+            {
+                "driver": "GTiff",
+                "height": mosaic.shape[1],
+                "width": mosaic.shape[2],
+                "transform": out_trans,
+            }
+        )
+        with rasterio.open(
+            f"./data/output_{start_date}.tiff", "w", **out_meta
+        ) as dest:
+            dest.write(mosaic)
         download_type = "batch"
         return mosaic, download_type
