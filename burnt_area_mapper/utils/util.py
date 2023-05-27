@@ -1,6 +1,5 @@
 import glob
 import math
-from datetime import datetime, timedelta
 from typing import Any, Optional, Tuple
 
 import matplotlib
@@ -139,18 +138,6 @@ def reclassify(array):
                 reclass[i, j] = 5
 
     return reclass
-
-
-def recalibrate_time(time, action, days_to_subtract=7):
-    if action == "+":
-        end_date = datetime.date(time + timedelta(days=days_to_subtract))
-        start_date = datetime.date(time)
-    elif action == "-":
-        start_date = datetime.date(time - timedelta(days=days_to_subtract))
-        end_date = datetime.date(time)
-    else:
-        "No es buone de nada!"
-    return start_date, end_date
 
 
 def calc_burnt_area(image):

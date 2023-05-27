@@ -17,7 +17,7 @@ def main(
         fire_end=end_date,
         imagery="Sentinel",
         coords=coords,
-    ).process()
+    ).nbr_process()
     (_, crs, geoTransform, _) = read_band_image()
     _ = array2raster(
         array=final_image,

@@ -23,8 +23,19 @@ class BurntArea(Sentinel):
         self.resolution = resolution
 
     def recalibrate_time(self, time, action, days_to_subtract=7):
+        """
+        This function recalibrates the time for the composite creation
+        Inputs:
+            time: the initial point time
+            action: whether it is pre or post time
+            days_to_subtract: number of days for composite creation
+        Returns:
+            start_date: start date of composite
+            end_date: end date of composite
+            days_to_subtract: number of days subtracted
+        """
         if action == "+":
-            end_date = datetime.date(time + timedelta(days=7))
+            end_date = datetime.date(time + timedelta(days=days_to_subtract))
             start_date = datetime.date(time)
         elif action == "-":
             start_date = datetime.date(time - timedelta(days=days_to_subtract))
@@ -34,6 +45,16 @@ class BurntArea(Sentinel):
         return start_date, end_date, days_to_subtract
 
     def download_fire(self, time, action, days_sub=7):
+        """
+        This is a process function for download of imagery
+        Inputs:
+            time: initial time
+            action: whether it is pre or post time
+            days_sub: number of days for composite creation
+        Returns:
+            image: final imagery
+            download_type: regular or batch download
+        """
         start_date, end_date, days_sub = self.recalibrate_time(
             time, action, days_sub
         )
@@ -49,12 +70,29 @@ class BurntArea(Sentinel):
         return image, download_type
 
     def calc_ba(self, image, download_type):
+        """
+        This function calculates the burnt area
+        Inputs:
+            image: numpy ndarray image
+            download_type: whether batch or single download
+        Returns:
+            ba: burned area
+        """
         NIR = self.get_band(image, 0, download_type)
         SWIR = self.get_band(image, 1, download_type)
         ba = (NIR - SWIR) / (NIR + SWIR)
         return ba
 
     def get_band(self, image, indice, download_type="regular"):
+        """
+        This function extracts a specific band from ndarray
+        Inputs:
+            image: numpy ndarray
+            indice: band position
+            download_type: whether it is a regular or batch download as the format of ndarray differs
+        Returns:
+            band: the band as numpy ndarray
+        """
         if download_type == "regular":
             band = image[:, :, indice]
             return band
@@ -62,10 +100,23 @@ class BurntArea(Sentinel):
         return band
 
     def calc_dnbr(self, pre, post):
+        """
+        Calculates the difference of nbr
+        Inputs:
+            pre: pre fire normalized burn ratio
+            post: post fire normalized burn ratio
+        Returns:
+            dnbr: difference of the normalized burn ratio
+        """
         dnbr = pre - post
         return dnbr
 
-    def process(self):
+    def nbr_process(self):
+        """
+        This is a process function to follow the normalized burn ratio algorithm
+        Returns:
+            final_image: normalized burn ratio ndarray
+        """
         pre_fire, download_type = self.download_fire(
             time=self.fire_start, action="-"
         )

@@ -24,6 +24,9 @@ class Sentinel:
         self._auth()
 
     def _auth(self):
+        """
+        This function authorizes SentinelHub
+        """
         self.config = SHConfig()
         if not self.config.sh_client_id or not self.config.sh_client_secret:
             print(
@@ -31,6 +34,13 @@ class Sentinel:
             )
 
     def _evalscript(self, model="regular"):
+        """
+        This function creates a script used to run SentinelHub services
+        Inputs:
+            model: type of run, regular is normalized burn ratio
+        Returns:
+            evalscript: script used for SentinelHub fetch
+        """
         if model == "regular":
             evalscript = """
                 //VERSION=3
@@ -106,17 +116,37 @@ class Sentinel:
 
     def _get_bbox(self):
         """
-        Inputs:
-            coords: tuple (miny, minx, maxy, maxx)
+        This function gets the bounding box based on coords
+        Returns:
+            bbox: SentinelHub BBox
         """
         bbox = BBox(bbox=self.coords, crs=CRS.WGS84)
         return bbox
 
     def _get_size(self, bbox):
+        """
+        This function gets the size of the bbox.
+        Inputs:
+            bbox: bounding box of the area
+        Returns:
+            size: size of the area for the SentinelHub call
+        """
         size = bbox_to_dimensions(bbox, resolution=10)
         return size
 
     def _get_sub_area(self, bbox, evalscript, start_date, end_date):
+        """
+        This
+        Inputs:
+            bbox: bbox of the investigative area
+            evalscript: the script used to fetch imagery
+            start_date: start date of the composite
+            end_date: end date of the composite
+        Returns:
+            request: SentinelHub imagery request
+            OR
+            cloud_check: if time needs to be recalibrated
+        """
         size = bbox_to_dimensions(bbox, resolution=10)
         request = SentinelHubRequest(
             evalscript=evalscript,
@@ -143,15 +173,31 @@ class Sentinel:
         return request
 
     def _split(self):
+        """
+        This function splits a bbox into a grid
+        Returns:
+            bbox_list: list of bounding boxes
+        """
         # (minx, miny, maxx, maxy)
         shp_box = box(*self.coords)
         bbox_splitter = BBoxSplitter(
             [shp_box], CRS.WGS84, (5, 3)
         )  # bounding box will be split into grid of 5x3 bounding boxes
         bbox_list = bbox_splitter.get_bbox_list()
-        return bbox_splitter, bbox_list
+        return bbox_list
 
     def _get_imagery(self, start_date, end_date, coords, action):
+        """
+        This functin fetches the imagery from SentinelHub
+        Inputs:
+            start_date: start date of the composite
+            end_date: end date of the composite
+            coords: coordinates of the bbox
+            action: whether it is pre or post time
+        Returns:
+            sentinel_image: imagery of the investigative area
+            download_type: whether it is batch or single download
+        """
         self.coords = coords
         self.action = action
         evalscript = self._evalscript()
@@ -188,6 +234,13 @@ class Sentinel:
         return sentinel_image, download_type
 
     def _check_clm(self, image):
+        """
+        This function checks the cloud mask of the imagery
+        Inputs:
+            image: numpy ndarray imagery
+        Returns:
+            "recalibrate" if composite time needs to be extended else True
+        """
         cloud_band = image[:, :, 2]
         _ = image[:, :, 3]
         # count occurrences of each unique value
@@ -211,10 +264,18 @@ class Sentinel:
         return
 
     def _batch_download(self, evalscript, start_date, end_date):
-        bbox_splitter, bbox_list = self._split()
+        """
+        This function splits bbox, downloads and mosaics
+        Inputs:
+            evalscript:
+            start_date: start date of the composite
+            end_date: end date of the composite
+        Returns:
+            mosaic: final mosaic of the area
+            download_type: whether it is batch or single download
+        """
+        bbox_list = self._split()
 
-        # create a list of requests
-        bbox_list = bbox_splitter.get_bbox_list()
         sh_requests = [
             self._get_sub_area(bbox, evalscript, start_date, end_date)
             for bbox in bbox_list
