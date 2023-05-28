@@ -27,6 +27,14 @@ Later you can the following prior to commiting but after git add:
 
 ### Commitizen
 
+To install Commitizen for this repo only, in the repo root run:
+
+`pip install -U commitizen`
+
+To install across the system:
+
+`pip install --user -U Commitizen`
+
 Commitizen is used for commiting as:
 
 `cz c`
