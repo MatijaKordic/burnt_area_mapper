@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -134,6 +135,21 @@ class BurntArea(Sentinel):
         # new_x = np.ma.masked_where(np.ma.getmask(m), x)
         return final_image
 
+    def apply_final_classification(self, image):
+        image_reclass = copy.copy(image)
+        image_reclass[np.where(image == -15)] = 100
+        image_reclass[np.where((image > -300) & (image <= -13))] = 50
+        image_reclass[np.where((image >= -14.00) & (image <= -0.251))] = 2
+        image_reclass[np.where((image > -0.250) & (image <= -0.101))] = 3
+        image_reclass[np.where((image > -0.100) & (image <= 0.09))] = 4
+        image_reclass[np.where((image > 0.100) & (image <= 0.269))] = 5
+        image_reclass[np.where((image > 0.270) & (image <= 0.439))] = 6
+        image_reclass[np.where((image > 0.440) & (image <= 0.659))] = 7
+        image_reclass[np.where((image > 0.660) & (image <= 40.300))] = 8
+        image_reclass[np.where(image > 40)] = 60
+        image_reclass[np.where(image_reclass == 50)] = 10
+        return image_reclass.astype("int8")
+
     def nbr_process(self):
         """
         This is a process function to follow the normalized burn ratio algorithm
@@ -152,4 +168,7 @@ class BurntArea(Sentinel):
         post_fire_index = self.calc_ba(post_fire, download_type)
         final_image = self.calc_dnbr(pre_fire_index, post_fire_index)
         image_masked = self.apply_water_mask(final_image, pre_water_mask)
-        return image_masked
+        classified = self.apply_final_classification(image_masked)
+        print(classified)
+        print(np.unique(classified, return_counts=True))
+        return classified
