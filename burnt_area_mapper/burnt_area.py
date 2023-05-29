@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import numpy as np
 from sentinel import Sentinel
 
 
@@ -78,8 +79,8 @@ class BurntArea(Sentinel):
         Returns:
             ba: burned area
         """
-        NIR = self.get_band(image, 0, download_type)
-        SWIR = self.get_band(image, 1, download_type)
+        NIR = self.get_band(image, 1, download_type).astype(np.int8)
+        SWIR = self.get_band(image, 2, download_type).astype(np.int8)
         ba = (NIR - SWIR) / (NIR + SWIR)
         return ba
 
@@ -111,6 +112,28 @@ class BurntArea(Sentinel):
         dnbr = pre - post
         return dnbr
 
+    def _get_water_mask(self, image, download_type):
+        GREEN = self.get_band(image, 0, download_type).astype(np.int8)
+        NIR = self.get_band(image, 1, download_type).astype(np.int8)
+        ndwi = (GREEN - NIR) / (GREEN + NIR)
+        # swm = ((B2 + B3) / (B8 + B11))
+        # B2 - blue
+        # B3 - green
+        # B8 - NIR
+        # B11 - SWIR
+        water_mask = np.where(ndwi > 0.3, -15, 0)
+        return water_mask
+
+    def apply_water_mask(self, image, mask):
+        new_mask = np.ma.masked_where(mask == -15, mask)
+        final_image = np.ma.masked_where(np.ma.getmask(new_mask), image)
+        final_image = final_image.filled(fill_value=-15)
+        # y = np.array([2,1,5,2])                         # y axis
+        # x = np.array([1,2,3,4])                         # x axis
+        # m = np.ma.masked_where(y>5, y)                  # filter out values larger than 5
+        # new_x = np.ma.masked_where(np.ma.getmask(m), x)
+        return final_image
+
     def nbr_process(self):
         """
         This is a process function to follow the normalized burn ratio algorithm
@@ -123,7 +146,10 @@ class BurntArea(Sentinel):
         post_fire, download_type = self.download_fire(
             time=self.fire_end, action="+"
         )
+        pre_water_mask = self._get_water_mask(pre_fire, download_type)
+        _ = self._get_water_mask(post_fire, download_type)
         pre_fire_index = self.calc_ba(pre_fire, download_type)
         post_fire_index = self.calc_ba(post_fire, download_type)
         final_image = self.calc_dnbr(pre_fire_index, post_fire_index)
-        return final_image
+        image_masked = self.apply_water_mask(final_image, pre_water_mask)
+        return image_masked

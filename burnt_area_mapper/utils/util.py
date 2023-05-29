@@ -28,11 +28,20 @@ def plot_image(
 def plot_burn_severity(image):
     # set colors for plotting and classes
     cmap = matplotlib.colors.ListedColormap(
-        ["red", "orange", "green", "yellow", "orange", "red", "purple"]
+        [
+            "blue",
+            "red",
+            "orange",
+            "green",
+            "yellow",
+            "brown",
+            "violet",
+            "purple",
+        ]
     )
     cmap.set_over("purple")
     cmap.set_under("white")
-    bounds = [-5.5, -0.25, -0.1, 0.1, 0.27, 0.440, 0.660, 1.3]
+    bounds = [-15, -5.5, -0.25, -0.1, 0.1, 0.27, 0.440, 0.660, 1.3]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
     fig, ax = plt.subplots(
@@ -45,10 +54,11 @@ def plot_burn_severity(image):
         ax=ax,
         fraction=0.035,
         pad=0.04,
-        ticks=[-5.5, -0.25, -0.1, 0.1, 0.27, 0.44, 0.66],
+        ticks=[-15, -5.5, -0.25, -0.1, 0.1, 0.27, 0.44, 0.66],
     )
     cbar.ax.set_yticklabels(
         [
+            "Water",
             "Enhanced regrowth, high (post-fire)",
             "Enhanced regrowth, low (post-fire)",
             "Unburned",

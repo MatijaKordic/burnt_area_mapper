@@ -48,16 +48,16 @@ class Sentinel:
                 function setup() {
                     return {
                         input: [{
-                            bands: ["B8A", "B12", "CLM", "CLP"]
+                            bands: ["B03", "B8A", "B12", "CLM", "CLP"]
                         }],
                         output: {
-                            bands: 4
+                            bands: 5
                         }
                     };
                 }
 
                 function evaluatePixel(sample) {
-                    return [sample.B8A, sample.B12, sample.CLM, sample.CLP];
+                    return [sample.B03, sample.B8A, sample.B12, sample.CLM, sample.CLP];
                 }
             """
         elif model == "all_bands":
@@ -241,8 +241,8 @@ class Sentinel:
         Returns:
             "recalibrate" if composite time needs to be extended else True
         """
-        cloud_band = image[:, :, 2]
-        _ = image[:, :, 3]
+        cloud_band = image[:, :, 3]
+        _ = image[:, :, 4]
         # count occurrences of each unique value
         unique, counts = np.unique(cloud_band, return_counts=True)
         dict_counts = dict(zip(unique, counts))
