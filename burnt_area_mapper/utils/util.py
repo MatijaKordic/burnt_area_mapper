@@ -25,10 +25,11 @@ def plot_image(
     plt.savefig("foo_2.png")
 
 
-def plot_burn_severity(image):
+def plot_burn_severity(image, name):
     # set colors for plotting and classes
     cmap = matplotlib.colors.ListedColormap(
         [
+            "blue",
             "red",
             "orange",
             "green",
@@ -36,12 +37,11 @@ def plot_burn_severity(image):
             "brown",
             "violet",
             "purple",
-            "blue",
         ]
     )
     cmap.set_over("purple")
     cmap.set_under("white")
-    bounds = [1, 2, 3, 4, 5, 6, 7, 8, 10]
+    bounds = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
     fig, ax = plt.subplots(
@@ -58,6 +58,7 @@ def plot_burn_severity(image):
     )
     cbar.ax.set_yticklabels(
         [
+            "Water",
             "Enhanced regrowth, high (post-fire)",
             "Enhanced regrowth, low (post-fire)",
             "Unburned",
@@ -65,11 +66,10 @@ def plot_burn_severity(image):
             "Moderate-low Severity",
             "Moderate-high Severity",
             "High Severity",
-            "Water",
         ]
     )
     # plt.show()
-    plt.savefig("foo_3.png", bbox_inches="tight")
+    plt.savefig(f"./data/{name}.png", bbox_inches="tight")
 
 
 def array2raster(array, geoTransform, projection, filename):
@@ -87,13 +87,6 @@ def array2raster(array, geoTransform, projection, filename):
     pixels_y = array.shape[0]
 
     driver = gdal.GetDriverByName("GTiff")
-    # dataset = driver.Create(
-    #     filename,
-    #     pixels_x,
-    #     pixels_y,
-    #     1,
-    #     gdal.GDT_Float64,
-    # )
     dataset = driver.Create(
         filename,
         pixels_x,

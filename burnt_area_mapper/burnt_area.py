@@ -1,4 +1,5 @@
 import copy
+import json
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -147,8 +148,24 @@ class BurntArea(Sentinel):
         image_reclass[np.where((image > 0.440) & (image <= 0.659))] = 7
         image_reclass[np.where((image > 0.660) & (image <= 40.300))] = 8
         image_reclass[np.where(image > 40)] = 60
-        image_reclass[np.where(image_reclass == 50)] = 10
+        image_reclass[np.where(image_reclass == 50)] = 1
+        raster_dict = {
+            "1": "Water",
+            "2": "Enhanced regrowth, high (post-fire)",
+            "3": "Enhanced regrowth, low (post-fire)",
+            "4": "Unburned",
+            "5": "Low Severity",
+            "6": "Moderate-low Severity",
+            "7": "Moderate-high Severity",
+            "8": "High Severity",
+            "60": "Unclassified",
+        }
+        self.write_raster_config("raster_classification", raster_dict)
         return image_reclass.astype("int8")
+
+    def write_raster_config(self, name, config_dict):
+        with open(f"./data/{name}.json", "w") as outfile:
+            json.dump(config_dict, outfile)
 
     def nbr_process(self):
         """
@@ -169,6 +186,4 @@ class BurntArea(Sentinel):
         final_image = self.calc_dnbr(pre_fire_index, post_fire_index)
         image_masked = self.apply_water_mask(final_image, pre_water_mask)
         classified = self.apply_final_classification(image_masked)
-        print(classified)
-        print(np.unique(classified, return_counts=True))
         return classified

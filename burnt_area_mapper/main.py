@@ -22,10 +22,10 @@ def main(
     _ = array2raster(
         array=final_image,
         projection=crs,
-        filename="output.tiff",
+        filename="./data/output.tiff",
         geoTransform=geoTransform,
     )
-    plot_burn_severity(image=final_image)
+    plot_burn_severity(image=final_image, name=f"Fire_{start_date}_{end_date}")
 
 
 if __name__ == "__main__":
