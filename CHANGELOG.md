@@ -1,3 +1,9 @@
+## 0.1.2 (2023-05-30)
+
+### Fix
+
+- **burnt_area-and-utils**: work around the classification output
+
 ## 0.1.1 (2023-05-30)
 
 ### Fix
