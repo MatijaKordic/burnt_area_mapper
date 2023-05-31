@@ -115,28 +115,47 @@ class BurntArea(Sentinel):
         return dnbr
 
     def _get_water_mask(self, image, download_type):
+        """
+        This function calculates the water mask as NDWI
+        Inputs:
+            image: numpy ndarray image with several bands
+            download_type: whether download was regular or batch
+        Returns:
+            water_mask: numpy ndarray water mask
+        """
         GREEN = self.get_band(image, 0, download_type).astype(np.int8)
         NIR = self.get_band(image, 1, download_type).astype(np.int8)
         ndwi = (GREEN - NIR) / (GREEN + NIR)
-        # swm = ((B2 + B3) / (B8 + B11))
+        # swm = ((B2 + B3) / (B8 + B11)) seems like a good check too
         # B2 - blue
         # B3 - green
         # B8 - NIR
         # B11 - SWIR
-        water_mask = np.where(ndwi > 0.3, -15, 0)
+        water_mask = np.where(ndwi > 0.5, -15, 0)
         return water_mask
 
     def apply_water_mask(self, image, mask):
+        """
+        This function applies the water mask to the final output.
+        Inputs:
+            image: numpy ndarray final output
+            mask: water mask
+        Returns:
+            final_image: masked output
+        """
         new_mask = np.ma.masked_where(mask == -15, mask)
         final_image = np.ma.masked_where(np.ma.getmask(new_mask), image)
         final_image = final_image.filled(fill_value=-15)
-        # y = np.array([2,1,5,2])                         # y axis
-        # x = np.array([1,2,3,4])                         # x axis
-        # m = np.ma.masked_where(y>5, y)                  # filter out values larger than 5
-        # new_x = np.ma.masked_where(np.ma.getmask(m), x)
         return final_image
 
     def apply_final_classification(self, image):
+        """
+        This function applies the final classification of burned areas.
+        Inputs:
+            image: image to classify
+        Returns:
+            image_reclass: reclassified image
+        """
         image_reclass = copy.copy(image)
         image_reclass[np.where(image == -15)] = 100
         image_reclass[np.where((image > -300) & (image <= -13))] = 50
@@ -164,6 +183,12 @@ class BurntArea(Sentinel):
         return image_reclass.astype("int8")
 
     def write_raster_config(self, name, config_dict):
+        """
+        This function writes the raster configuration.
+        Inputs:
+            name: name of output json
+            config_dict: dictionary with classification
+        """
         with open(f"./data/{name}.json", "w") as outfile:
             json.dump(config_dict, outfile)
 

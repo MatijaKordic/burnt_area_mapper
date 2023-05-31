@@ -1,3 +1,15 @@
+# Intro to Repo
+
+The repo serves to provide the analysis of fires using Earth Observation.
+
+At the moment, the repo connects with SentinelHub to fetch the Sentinel-2 imagery based on which the analysis will be performed. 
+
+So far, the picked algorithm for fire analysis is [Normalized Burn Ratio](https://www.un-spider.org/advisory-support/recommended-practices/recommended-practice-burn-severity/in-detail/normalized-burn-ratio). The repo plans to expand to support other fire algorithms in future. 
+
+Runs are at the moment based on bounding box in decimal and the repo supports large area observations as it performs the split and mosaic if needed. However, this split needs to be further developed as at the moment it is hard coded matrix and it will be as per need in the upcoming versions. Additionally, a water mask is provided. 
+
+The output is a TIFF and following JSON file with classification details and a png too. The png hasn't been tested if it matches 100% with the TIFF because it is based on internal settings and not so much on TIFF settings. 
+
 
 ## Installation
 
