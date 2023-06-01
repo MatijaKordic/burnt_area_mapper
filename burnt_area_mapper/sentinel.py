@@ -49,16 +49,16 @@ class Sentinel:
                 function setup() {
                     return {
                         input: [{
-                            bands: ["B03", "B8A", "B12", "CLM", "CLP"]
+                            bands: ["B03", "B8A", "B12", "CLM", "CLP", "B02", "B11"]
                         }],
                         output: {
-                            bands: 5
+                            bands: 7
                         }
                     };
                 }
 
                 function evaluatePixel(sample) {
-                    return [sample.B03, sample.B8A, sample.B12, sample.CLM, sample.CLP];
+                    return [sample.B03, sample.B8A, sample.B12, sample.CLM, sample.CLP, sample.B02, sample.B11];
                 }
             """
         elif model == "all_bands":
@@ -153,7 +153,7 @@ class Sentinel:
             evalscript=evalscript,
             input_data=[
                 SentinelHubRequest.input_data(
-                    data_collection=DataCollection.SENTINEL2_L2A,
+                    data_collection=DataCollection.SENTINEL2_L1C,
                     time_interval=(start_date, end_date),
                     mosaicking_order=MosaickingOrder.LEAST_CC,
                 )
@@ -217,7 +217,7 @@ class Sentinel:
             evalscript=evalscript,
             input_data=[
                 SentinelHubRequest.input_data(
-                    data_collection=DataCollection.SENTINEL2_L2A,
+                    data_collection=DataCollection.SENTINEL2_L1C,
                     time_interval=(start_date, end_date),
                     mosaicking_order=MosaickingOrder.LEAST_CC,
                 )

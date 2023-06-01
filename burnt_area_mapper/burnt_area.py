@@ -125,14 +125,20 @@ class BurntArea(Sentinel):
         """
         GREEN = self.get_band(image, 0, download_type).astype(np.int8)
         NIR = self.get_band(image, 1, download_type).astype(np.int8)
-        ndwi = (GREEN - NIR) / (GREEN + NIR)
+        # ndwi = (GREEN - NIR) / (GREEN + NIR)
+        BLUE = self.get_band(image, 5, download_type).astype(np.int8)
+        SWIR = self.get_band(image, 6, download_type).astype(np.int8)
+        swm = (BLUE + GREEN) / (NIR + SWIR)
+        swm_water_mask = copy.copy(swm)
+        swm_water_mask[(swm >= 1.4) & (swm <= 5.6)] = -15
+        # swm_water_mask = np.where((swm >= 1.4) & (swm <= 1.6), -15, 0)
         # swm = ((B2 + B3) / (B8 + B11)) seems like a good check too
         # B2 - blue
         # B3 - green
         # B8 - NIR
         # B11 - SWIR
-        water_mask = np.where(ndwi > 0.3, -15, 0)
-        return water_mask
+        # ndwi_water_mask = np.where(ndwi > 0.3, -15, 0)
+        return swm_water_mask
 
     def apply_water_mask(self, image, mask):
         """
