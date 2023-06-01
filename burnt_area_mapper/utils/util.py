@@ -41,7 +41,7 @@ def plot_burn_severity(image, name):
     )
     cmap.set_over("purple")
     cmap.set_under("white")
-    bounds = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    bounds = [0, 2, 3, 4, 5, 6, 7, 8, 9]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
     fig, ax = plt.subplots(
