@@ -131,7 +131,7 @@ class BurntArea(Sentinel):
         # B3 - green
         # B8 - NIR
         # B11 - SWIR
-        water_mask = np.where(ndwi > 0.5, -15, 0)
+        water_mask = np.where(ndwi > 0.3, -15, 0)
         return water_mask
 
     def apply_water_mask(self, image, mask):

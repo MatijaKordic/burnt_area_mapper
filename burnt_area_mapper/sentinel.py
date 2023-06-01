@@ -1,4 +1,5 @@
 import tempfile
+from math import ceil
 from pathlib import Path
 
 import numpy as np
@@ -172,16 +173,19 @@ class Sentinel:
             return cloud_check
         return request
 
-    def _split(self):
+    def _split(self, x, y):
         """
         This function splits a bbox into a grid
+        Inputs:
+            x: num of x splits
+            y: num of y splits
         Returns:
             bbox_list: list of bounding boxes
         """
         # (minx, miny, maxx, maxy)
         shp_box = box(*self.coords)
         bbox_splitter = BBoxSplitter(
-            [shp_box], CRS.WGS84, (5, 3)
+            [shp_box], CRS.WGS84, (x, y)
         )  # bounding box will be split into grid of 5x3 bounding boxes
         bbox_list = bbox_splitter.get_bbox_list()
         return bbox_list
@@ -205,7 +209,7 @@ class Sentinel:
         size = self._get_size(bbox)
         if int(size[1]) > 2500:
             image, download_type = self._batch_download(
-                evalscript, start_date, end_date
+                evalscript, start_date, end_date, size
             )
             return image, download_type
         request = SentinelHubRequest(
@@ -263,7 +267,7 @@ class Sentinel:
                 return "recalibrate"
         return
 
-    def _batch_download(self, evalscript, start_date, end_date):
+    def _batch_download(self, evalscript, start_date, end_date, size):
         """
         This function splits bbox, downloads and mosaics
         Inputs:
@@ -274,7 +278,11 @@ class Sentinel:
             mosaic: final mosaic of the area
             download_type: whether it is batch or single download
         """
-        bbox_list = self._split()
+        x, y = size[0], size[1]
+        # max size is 2500 * 2500 pixel
+        x = ceil(x / 2500)
+        y = ceil(y / 2500)
+        bbox_list = self._split(x, y)
 
         sh_requests = [
             self._get_sub_area(bbox, evalscript, start_date, end_date)
