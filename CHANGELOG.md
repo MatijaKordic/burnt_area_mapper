@@ -1,3 +1,9 @@
+## 0.2.0 (2023-06-02)
+
+### Feat
+
+- **io,-burnt_area,-sentinel**: added new water mask, io and support for gdf bounds
+
 ## 0.1.3 (2023-06-01)
 
 ### Fix

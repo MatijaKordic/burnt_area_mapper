@@ -1,28 +1,9 @@
 import glob
-import math
-from typing import Any, Optional, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from osgeo import gdal, osr
-
-
-def plot_image(
-    image: np.ndarray,
-    factor: float = 1.0,
-    clip_range: Optional[Tuple[float, float]] = None,
-    **kwargs: Any,
-) -> None:
-    """Utility function for plotting RGB images."""
-    _, ax = plt.subplots(nrows=1, ncols=1, figsize=(15, 15))
-    if clip_range is not None:
-        ax.imshow(np.clip(image * factor, *clip_range), **kwargs)
-    else:
-        ax.imshow(image * factor, **kwargs)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    plt.savefig("foo_2.png")
 
 
 def plot_burn_severity(image, name):
@@ -125,41 +106,6 @@ def read_band_image(band="response", path="start"):
     return data, spatialRef, geoTransform, targetprj
 
 
-def reclassify(array):
-    """
-    This function reclassifies an array
-    input:  array           array (n x m)    input array
-    output: reclass         array (n x m)    reclassified array
-    """
-    reclass = np.zeros((array.shape[0], array.shape[1]))
-    for i in range(0, array.shape[0]):
-        for j in range(0, array.shape[1]):
-            if math.isnan(array[i, j]):
-                reclass[i, j] = np.nan
-            elif array[i, j] < 0.1:
-                reclass[i, j] = 1
-            elif array[i, j] < 0.27:
-                reclass[i, j] = 2
-            elif array[i, j] < 0.44:
-                reclass[i, j] = 3
-            elif array[i, j] < 0.66:
-                reclass[i, j] = 4
-            else:
-                reclass[i, j] = 5
-
-    return reclass
-
-
-def calc_burnt_area(image):
-    reclass = reclassify(image.ReadAsArray())
-    k = [
-        "Unburned hectares",
-        "Low severity hectares",
-        "Moderate-low severity hectares",
-        "Moderate-high severity hectares",
-        "High severity",
-    ]
-    for i in range(1, 6):
-        x = reclass[reclass == i]
-        m = x.size * 0.04
-        print("%s: %.2f" % (k[i - 1], m))
+def get_gdf_bounds(gdf):
+    bounds = gdf.total_bounds
+    return bounds

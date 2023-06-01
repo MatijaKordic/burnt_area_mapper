@@ -5,5 +5,15 @@ OPTION_START_DATE = typer.Option(
 )
 OPTION_END_DATE = typer.Option(None, "--end_date", help="End date of the fire")
 OPTION_COORDS = typer.Option(
-    None, "--coords", help="Tuple of coordinates for the bounding box"
+    (0.0, 0.0, 0.0, 0.0),
+    "--coords",
+    help="Tuple of coordinates for the bounding box",
+)
+OPTION_GDF_BOUNDS = typer.Option(
+    False,
+    "--gdf_bounds/--no_gdf_bounds",
+    help="True if a file is used to get the bounds",
+)
+OPTION_GDF_PATH = typer.Option(
+    None, "--gdf_path", help="Path to where the vector data is stored"
 )
