@@ -9,4 +9,8 @@ dependencies:
   - gdal>=3.6.4
   - matplotlib>=3.7.1
   - typer[all]>=0.9.0
-  - pre-commit=3.3.2
+  - pre-commit==3.3.2
+  - geopandas>=0.13.0
+  - rioxarray>=0.14.1
+  - python-dotenv>=1.0.0
+  - sentinelsat>=1.2.1

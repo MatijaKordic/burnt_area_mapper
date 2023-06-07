@@ -1,4 +1,4 @@
-version: '2.15.1'
+version: '2'
 
 services:
   burnt_area_mapper:

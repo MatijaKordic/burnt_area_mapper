@@ -17,3 +17,8 @@ OPTION_GDF_BOUNDS = typer.Option(
 OPTION_GDF_PATH = typer.Option(
     None, "--gdf_path", help="Path to where the vector data is stored"
 )
+OPTION_DOWNLOAD_BY = typer.Option(
+    "CA",
+    "--download_by",
+    help="Downloading via SentinelHub (SH) or Copernicus API (CA)",
+)
