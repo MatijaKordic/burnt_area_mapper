@@ -1,3 +1,9 @@
+## 0.3.0 (2023-06-08)
+
+### Feat
+
+- **sentinel_sat**: added support for copernicus api download
+
 ## 0.2.0 (2023-06-02)
 
 ### Feat
