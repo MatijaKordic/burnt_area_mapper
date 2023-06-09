@@ -1,3 +1,9 @@
+## 0.3.1 (2023-06-09)
+
+### Fix
+
+- **sentinel_sat**: added clip to aoi
+
 ## 0.3.0 (2023-06-08)
 
 ### Feat
