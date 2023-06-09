@@ -99,7 +99,7 @@ def read_band_image(band="response", path="./data/"):
              targetprj                        spatial reference
     """
     # a = path+'*B'+band+'*.tiff'
-    a = f"{path}output_*.tiff"
+    a = f"{path}output*clipped*.tiff"
     img = gdal.Open(glob.glob(a)[0])
     data = np.array(img.GetRasterBand(1).ReadAsArray())
     spatialRef = img.GetProjection()

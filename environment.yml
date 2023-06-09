@@ -1,4 +1,4 @@
-name: burnt_area_mapper_2
+name: burnt_area_mapper_3
 channels:
   - conda-forge
 dependencies:
